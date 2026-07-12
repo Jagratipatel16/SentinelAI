@@ -1,0 +1,6 @@
+sender,receiver,amount,transaction_type,user_id
+A,B,2500,UPI,2
+John,David,65000,IMPS,2
+Alice,Bob,150000,NEFT,2
+Rahul,Aman,3500,UPI,2
+Riya,Priya,85000,RTGS,2

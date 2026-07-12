@@ -6,6 +6,8 @@ from app.models.transaction import Transaction
 from app.models.user import User
 from app.schemas.transaction import TransactionCreate, TransactionResponse
 from app.services.fraud_detector import detect_fraud
+from fastapi import UploadFile, File
+import pandas as pd
 
 router = APIRouter(
     prefix="/transactions",
@@ -64,3 +66,44 @@ def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
         )
 
     return transaction
+
+@router.post("/upload")
+def upload_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only CSV files are allowed"
+        )
+
+    df = pd.read_csv(file.file)
+
+    for _, row in df.iterrows():
+
+        user = db.query(User).filter(User.id == row["user_id"]).first()
+
+        if not user:
+            continue
+
+        status = detect_fraud(row["amount"])
+
+        transaction = Transaction(
+            sender=row["sender"],
+            receiver=row["receiver"],
+            amount=row["amount"],
+            transaction_type=row["transaction_type"],
+            status=status,
+            user_id=row["user_id"]
+        )
+
+        db.add(transaction)
+
+    db.commit()
+
+    return {
+        "message": "CSV uploaded successfully",
+        "rows": len(df)
+    }
