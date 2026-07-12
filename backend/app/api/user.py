@@ -5,6 +5,7 @@ from app.database.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
 from app.core.security import hash_password
+from app.core.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/users",
@@ -29,3 +30,12 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=list[UserResponse])
 def get_users(db: Session = Depends(get_db)):
     return db.query(User).all()
+
+@router.get("/me")
+def current_user(
+    email: str = Depends(get_current_user)
+):
+    return {
+        "email": email,
+        "message": "Authorized User"
+    }
