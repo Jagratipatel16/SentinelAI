@@ -51,3 +51,12 @@ htmlcov/
 # Misc
 # -----------------------------
 *.sqlite3
+
+# Large dataset
+dataset/PS_20174392719_1491204439457_log.csv
+
+# Generated train-test split
+dataset/X_train.csv
+dataset/X_test.csv
+dataset/y_train.csv
+dataset/y_test.csv
