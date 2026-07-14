@@ -13,6 +13,8 @@ from app.api.dashboard import router as dashboard_router
 from app.api.predict import router as predict_router
 from app.api import graph
 from app.api import explanation
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 # Create tables
@@ -22,6 +24,17 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routes

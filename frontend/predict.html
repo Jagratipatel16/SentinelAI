@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Transaction Prediction</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<nav>
+
+    <h2>SentinelAI</h2>
+
+    <ul>
+
+        <li><a href="dashboard.html">Dashboard</a></li>
+
+        <li><a href="predict.html">Predict</a></li>
+
+        <li><a href="upload.html">Upload CSV</a></li>
+
+        <li><a href="graph.html">Graph</a></li>
+
+        <li><a href="explanation.html">AI Explanation</a></li>
+
+        <li><a href="#" onclick="logout()">Logout</a></li>
+
+    </ul>
+
+</nav>
+
+<div class="container">
+
+<h1>Predict Fraud Transaction</h1>
+
+<form id="predictForm">
+
+<label>Step</label>
+<input type="number" id="step" required>
+
+<label>Transaction Type</label>
+
+<select id="type">
+
+<option value="0">CASH_IN</option>
+
+<option value="1">CASH_OUT</option>
+
+<option value="2">DEBIT</option>
+
+<option value="3">PAYMENT</option>
+
+<option value="4">TRANSFER</option>
+
+</select>
+
+<label>Amount</label>
+<input type="number" id="amount" required>
+
+<label>Old Balance Sender</label>
+<input type="number" id="oldbalanceOrg" required>
+
+<label>New Balance Sender</label>
+<input type="number" id="newbalanceOrig" required>
+
+<label>Old Balance Receiver</label>
+<input type="number" id="oldbalanceDest" required>
+
+<label>New Balance Receiver</label>
+<input type="number" id="newbalanceDest" required>
+
+<label>Flagged Fraud</label>
+
+<select id="isFlaggedFraud">
+
+<option value="0">No</option>
+
+<option value="1">Yes</option>
+
+</select>
+
+<br><br>
+
+<button type="button"
+        onclick="predictTransaction()">
+
+Predict
+
+</button>
+
+</form>
+
+<hr>
+
+<h2>Prediction Result</h2>
+
+<p><b>Status :</b> <span id="prediction">-</span></p>
+
+<p><b>Probability :</b> <span id="probability">-</span></p>
+
+<p><b>Risk Score :</b> <span id="risk">-</span></p>
+
+</div>
+
+<script src="js/predict.js"></script>
+
+</body>
+
+</html>

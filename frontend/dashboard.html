@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SentinelAI Dashboard</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    <!-- Navbar -->
+
+    <nav>
+
+        <h2>SentinelAI</h2>
+
+        <ul>
+
+            <li><a href="dashboard.html">Dashboard</a></li>
+
+            <li><a href="predict.html">Predict</a></li>
+
+            <li><a href="upload.html">Upload CSV</a></li>
+
+            <li><a href="graph.html">Graph</a></li>
+
+            <li><a href="explanation.html">AI Explanation</a></li>
+
+            <li><a href="#" onclick="logout()">Logout</a></li>
+
+        </ul>
+
+    </nav>
+
+    <!-- Main Container -->
+
+    <div class="container">
+
+        <h1>Dashboard</h1>
+
+        <br>
+
+        <div class="dashboard">
+
+            <div class="stat-card">
+                <h3>Total Transactions</h3>
+                <h1 id="total">0</h1>
+            </div>
+
+            <div class="stat-card">
+                <h3>Fraud Transactions</h3>
+                <h1 id="fraud">0</h1>
+            </div>
+
+            <div class="stat-card">
+                <h3>Safe Transactions</h3>
+                <h1 id="safe">0</h1>
+            </div>
+
+            <div class="stat-card">
+                <h3>Suspicious Transactions</h3>
+                <h1 id="high">0</h1>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending Transactions</h3>
+                <h1 id="medium">0</h1>
+            </div>
+
+            <div class="stat-card">
+                <h3>Fraud Amount (₹)</h3>
+                <h1 id="low">0</h1>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Amount (₹)</h3>
+                <h1 id="amount">0</h1>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="js/dashboard.js"></script>
+
+</body>
+
+</html>
