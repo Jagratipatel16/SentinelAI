@@ -10,7 +10,8 @@ from app.api.auth import router as auth_router
 from app.models.transaction import Transaction
 from app.api.transaction import router as transaction_router
 from app.api.dashboard import router as dashboard_router
-
+from app.api.predict import router as predict_router
+from app.api import graph
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -26,6 +27,8 @@ app.include_router(router)
 app.include_router(auth_router)
 app.include_router(transaction_router)
 app.include_router(dashboard_router)
+app.include_router(predict_router)
+app.include_router(graph.router)
 
 @app.get("/")
 def home():
