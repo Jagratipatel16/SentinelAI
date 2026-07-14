@@ -12,6 +12,8 @@ from app.api.transaction import router as transaction_router
 from app.api.dashboard import router as dashboard_router
 from app.api.predict import router as predict_router
 from app.api import graph
+from app.api import explanation
+
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -29,6 +31,7 @@ app.include_router(transaction_router)
 app.include_router(dashboard_router)
 app.include_router(predict_router)
 app.include_router(graph.router)
+app.include_router(explanation.router)
 
 @app.get("/")
 def home():
