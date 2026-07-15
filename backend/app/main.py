@@ -14,7 +14,7 @@ from app.api.predict import router as predict_router
 from app.api import graph
 from app.api import explanation
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.api import upload
 
 
 # Create tables
@@ -45,6 +45,7 @@ app.include_router(dashboard_router)
 app.include_router(predict_router)
 app.include_router(graph.router)
 app.include_router(explanation.router)
+app.include_router(upload.router)
 
 @app.get("/")
 def home():

@@ -15,6 +15,14 @@ if (!token) {
 
 async function predictTransaction() {
 
+    // Show Loading
+
+    document.getElementById("loading").style.display = "block";
+
+    document.getElementById("resultCard").style.display = "none";
+
+    // Collect Data
+
     const data = {
 
         step: parseInt(document.getElementById("step").value),
@@ -37,6 +45,8 @@ async function predictTransaction() {
 
     try {
 
+        //---------------- Prediction API ----------------//
+
         const response = await fetch(
 
             API_URL + "/predict/",
@@ -47,7 +57,9 @@ async function predictTransaction() {
 
                 headers: {
 
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+
+                    "Authorization": "Bearer " + token
 
                 },
 
@@ -59,7 +71,39 @@ async function predictTransaction() {
 
         const result = await response.json();
 
-        console.log(result);
+        //---------------- AI Explanation API ----------------//
+
+        const explanationResponse = await fetch(
+
+            API_URL + "/explanation/",
+
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type": "application/json",
+
+                    "Authorization": "Bearer " + token
+
+                },
+
+                body: JSON.stringify(data)
+
+            }
+
+        );
+
+        const explanation = await explanationResponse.json();
+
+        //---------------- Hide Loading ----------------//
+
+        document.getElementById("loading").style.display = "none";
+
+        document.getElementById("resultCard").style.display = "block";
+
+        //---------------- Prediction ----------------//
 
         document.getElementById("prediction").innerHTML =
             result.prediction;
@@ -68,10 +112,19 @@ async function predictTransaction() {
             result.probability;
 
         document.getElementById("risk").innerHTML =
-            result.risk_score + "%";
+            result.risk_score + " %";
 
+        //---------------- Card Color ----------------//
+
+        const card = document.getElementById("resultCard");
+
+        card.classList.remove("safe");
+
+        card.classList.remove("fraud");
 
         if (result.prediction === "Fraud") {
+
+            card.classList.add("fraud");
 
             document.getElementById("prediction").style.color = "red";
 
@@ -79,15 +132,40 @@ async function predictTransaction() {
 
         else {
 
+            card.classList.add("safe");
+
             document.getElementById("prediction").style.color = "green";
 
         }
+
+        //---------------- AI Reasons ----------------//
+
+        const list = document.getElementById("reasons");
+
+        list.innerHTML = "";
+
+        explanation.reasons.forEach(reason => {
+
+            const li = document.createElement("li");
+
+            li.textContent = reason;
+
+            list.appendChild(li);
+
+        });
+
+        //---------------- Recommendation ----------------//
+
+        document.getElementById("recommendation").innerHTML =
+            explanation.recommendation;
 
     }
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        document.getElementById("loading").style.display = "none";
 
         alert("Prediction Failed.");
 

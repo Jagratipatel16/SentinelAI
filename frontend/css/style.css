@@ -172,3 +172,42 @@ width:90%;
 }
 
 }
+/* Result Card */
+
+.result-card{
+
+    margin-top:30px;
+
+    padding:25px;
+
+    border-radius:10px;
+
+    background:white;
+
+    box-shadow:0 0 15px rgba(0,0,0,.15);
+
+}
+
+.safe{
+
+    border-left:8px solid green;
+
+}
+
+.fraud{
+
+    border-left:8px solid red;
+
+}
+
+#loading{
+
+    margin-top:20px;
+
+    font-size:22px;
+
+    color:#1565C0;
+
+    font-weight:bold;
+
+}

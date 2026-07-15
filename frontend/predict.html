@@ -8,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Transaction Prediction</title>
+    <title>SentinelAI - Predict Transaction</title>
 
     <link rel="stylesheet" href="css/style.css">
 
@@ -16,102 +16,170 @@
 
 <body>
 
-<nav>
+    <!-- Navbar -->
 
-    <h2>SentinelAI</h2>
+    <nav>
 
-    <ul>
+        <h2>SentinelAI</h2>
 
-        <li><a href="dashboard.html">Dashboard</a></li>
+        <ul>
 
-        <li><a href="predict.html">Predict</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
 
-        <li><a href="upload.html">Upload CSV</a></li>
+            <li><a href="predict.html">Predict</a></li>
 
-        <li><a href="graph.html">Graph</a></li>
+            <li><a href="upload.html">Upload CSV</a></li>
 
-        <li><a href="explanation.html">AI Explanation</a></li>
+            <li><a href="graph.html">Graph</a></li>
 
-        <li><a href="#" onclick="logout()">Logout</a></li>
+            <li><a href="explanation.html">AI Explanation</a></li>
 
-    </ul>
+            <li><a href="#" onclick="logout()">Logout</a></li>
 
-</nav>
+        </ul>
 
-<div class="container">
+    </nav>
 
-<h1>Predict Fraud Transaction</h1>
+    <!-- Main Container -->
 
-<form id="predictForm">
+    <div class="container">
 
-<label>Step</label>
-<input type="number" id="step" required>
+        <h1>Predict Fraud Transaction</h1>
 
-<label>Transaction Type</label>
+        <form id="predictForm">
 
-<select id="type">
+            <label>Step</label>
+            <input type="number"
+                   id="step"
+                   required>
 
-<option value="0">CASH_IN</option>
+            <label>Transaction Type</label>
 
-<option value="1">CASH_OUT</option>
+            <select id="type">
 
-<option value="2">DEBIT</option>
+                <option value="0">CASH_IN</option>
 
-<option value="3">PAYMENT</option>
+                <option value="1">CASH_OUT</option>
 
-<option value="4">TRANSFER</option>
+                <option value="2">DEBIT</option>
 
-</select>
+                <option value="3">PAYMENT</option>
 
-<label>Amount</label>
-<input type="number" id="amount" required>
+                <option value="4">TRANSFER</option>
 
-<label>Old Balance Sender</label>
-<input type="number" id="oldbalanceOrg" required>
+            </select>
 
-<label>New Balance Sender</label>
-<input type="number" id="newbalanceOrig" required>
+            <label>Amount</label>
+            <input type="number"
+                   id="amount"
+                   required>
 
-<label>Old Balance Receiver</label>
-<input type="number" id="oldbalanceDest" required>
+            <label>Old Balance Sender</label>
+            <input type="number"
+                   id="oldbalanceOrg"
+                   required>
 
-<label>New Balance Receiver</label>
-<input type="number" id="newbalanceDest" required>
+            <label>New Balance Sender</label>
+            <input type="number"
+                   id="newbalanceOrig"
+                   required>
 
-<label>Flagged Fraud</label>
+            <label>Old Balance Receiver</label>
+            <input type="number"
+                   id="oldbalanceDest"
+                   required>
 
-<select id="isFlaggedFraud">
+            <label>New Balance Receiver</label>
+            <input type="number"
+                   id="newbalanceDest"
+                   required>
 
-<option value="0">No</option>
+            <label>Flagged Fraud</label>
 
-<option value="1">Yes</option>
+            <select id="isFlaggedFraud">
 
-</select>
+                <option value="0">No</option>
 
-<br><br>
+                <option value="1">Yes</option>
 
-<button type="button"
-        onclick="predictTransaction()">
+            </select>
 
-Predict
+            <br><br>
 
-</button>
+            <button
+                type="button"
+                onclick="predictTransaction()">
 
-</form>
+                Predict Transaction
 
-<hr>
+            </button>
 
-<h2>Prediction Result</h2>
+        </form>
 
-<p><b>Status :</b> <span id="prediction">-</span></p>
+        <hr>
 
-<p><b>Probability :</b> <span id="probability">-</span></p>
+        <!-- Loading -->
 
-<p><b>Risk Score :</b> <span id="risk">-</span></p>
+        <div id="loading"
+             style="display:none;">
 
-</div>
+            <h3>Predicting Transaction...</h3>
 
-<script src="js/predict.js"></script>
+        </div>
+
+        <!-- Result Card -->
+
+        <div id="resultCard"
+             class="result-card"
+             style="display:none;">
+
+            <h2>Prediction Result</h2>
+
+            <p>
+
+                <strong>Status :</strong>
+
+                <span id="prediction"></span>
+
+            </p>
+
+            <p>
+
+                <strong>Probability :</strong>
+
+                <span id="probability"></span>
+
+            </p>
+
+            <p>
+
+                <strong>Risk Score :</strong>
+
+                <span id="risk"></span>
+
+            </p>
+
+            <hr>
+
+            <h3>AI Explanation</h3>
+
+            <ul id="reasons">
+
+            </ul>
+
+            <p>
+
+                <strong>Recommendation :</strong>
+
+                <span id="recommendation"></span>
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <script src="js/predict.js"></script>
 
 </body>
 
