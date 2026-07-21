@@ -39,13 +39,3 @@ def upload_csv(file: UploadFile = File(...)):
             status_code=500,
             detail=str(e)
         )
-
-    return FileResponse(
-
-        path=file_path,
-
-        filename=filename,
-
-        media_type="text/csv"
-
-    )

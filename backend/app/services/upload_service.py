@@ -15,7 +15,14 @@ MODEL_PATH = os.path.join(
     "fraud_model.pkl"
 )
 
+ENCODER_PATH = os.path.join(
+    BASE_DIR,
+    "models",
+    "type_encoder.pkl"
+)
+
 model = joblib.load(MODEL_PATH)
+type_encoder = joblib.load(ENCODER_PATH)
 
 
 # --------------------------------------------------
@@ -78,7 +85,25 @@ def process_csv(file):
 
     ]
 
-    X = df[features]
+    X = df[features].copy()
+
+    # ---------- Encode "type" column ----------
+    # Model was trained on numeric type codes (see type_encoder.pkl),
+    # but uploaded CSVs contain text labels like "PAYMENT", "TRANSFER".
+
+    unknown_types = set(X["type"].astype(str).unique()) - set(
+        type_encoder.classes_
+    )
+
+    if unknown_types:
+        raise ValueError(
+            "Unknown transaction type(s) in CSV: "
+            + ", ".join(unknown_types)
+            + ". Expected one of: "
+            + ", ".join(type_encoder.classes_)
+        )
+
+    X["type"] = type_encoder.transform(X["type"].astype(str))
 
     # ---------- Prediction ----------
 

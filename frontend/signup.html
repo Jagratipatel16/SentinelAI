@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>SentinelAI Login</title>
+    <title>SentinelAI Signup</title>
 
     <link rel="stylesheet"
           href="css/style.css">
@@ -23,8 +22,16 @@
         <h2>SentinelAI</h2>
 
         <p style="text-align:center; margin-bottom:20px;">
-            Fraud Detection System
+            Create Your Account
         </p>
+
+        <label>Username</label>
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Enter Username"
+        >
 
         <label>Email</label>
 
@@ -42,15 +49,15 @@
             placeholder="Enter Password"
         >
 
-        <button onclick="login()">
-            Login
+        <button onclick="signup()">
+            Sign Up
         </button>
 
         <br><br>
 
         <p style="text-align:center;">
-            New user?
-            <a href="signup.html">Sign up</a>
+            Already have an account?
+            <a href="login.html">Login</a>
         </p>
 
         <p
@@ -60,7 +67,7 @@
 
     </div>
 
-    <script src="js/login.js"></script>
+    <script src="js/signup.js"></script>
 
 </body>
 
