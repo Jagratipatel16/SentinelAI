@@ -1,8 +1,7 @@
+
 const API_URL = "http://127.0.0.1:8000";
 
-// -------------------------------
 // Check Login
-// -------------------------------
 
 const token = localStorage.getItem("access_token");
 
@@ -12,87 +11,99 @@ if (!token) {
 
 }
 
-
-// -------------------------------
 // Upload CSV
-// -------------------------------
 
-async function uploadCSV() {
+async function uploadCsv() {
 
-    const file = document.getElementById("csvFile").files[0];
+    const fileInput = document.getElementById("csvFile");
 
-    if (!file) {
+    if (!fileInput.files.length) {
 
-        alert("Please select a CSV file.");
-
+        alert("Please choose a CSV file first.");
         return;
 
     }
 
-    document.getElementById("loading").style.display = "block";
+    const file = fileInput.files[0];
 
+    if (!file.name.endsWith(".csv")) {
+
+        alert("Only .csv files are allowed.");
+        return;
+
+    }
+
+    // Show Loading
+
+    document.getElementById("loading").style.display = "block";
     document.getElementById("resultCard").style.display = "none";
 
     const formData = new FormData();
-
     formData.append("file", file);
 
     try {
 
-    const response = await fetch(
-        API_URL + "/upload/",
-        {
-            method: "POST",
-            headers: {
-                "Authorization": "Bearer " + token
-            },
-            body: formData
+        const response = await fetch(
+
+            API_URL + "/upload/",
+
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            }
+
+        );
+
+        if (!response.ok) {
+
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Upload failed.");
+
         }
-    );
 
-    console.log("Status:", response.status);
+        const result = await response.json();
 
-    const data = await response.json();
+        // Hide Loading
 
-    console.log("Response:", data);
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("resultCard").style.display = "block";
 
-    if (!response.ok) {
-        alert(data.detail || "Upload Failed");
-        return;
+        // Fill Summary
+
+        document.getElementById("totalRecords").innerHTML =
+            result.total_records;
+
+        document.getElementById("fraudCount").innerHTML =
+            result.fraud_transactions;
+
+        document.getElementById("safeCount").innerHTML =
+            result.safe_transactions;
+
+        // Download Link
+
+        document.getElementById("downloadLink").href =
+            API_URL + "/upload/download/" + result.download_file;
+
     }
 
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("resultCard").style.display = "block";
+    catch (error) {
 
-    document.getElementById("totalRecords").innerHTML =
-        data.total_records;
+        console.error(error);
+        document.getElementById("loading").style.display = "none";
+        alert(error.message || "Unable to upload CSV.");
 
-    document.getElementById("fraudRecords").innerHTML =
-        data.fraud_transactions;
-
-    document.getElementById("safeRecords").innerHTML =
-        data.safe_transactions;
-
-}
-catch(error){
-
-    console.log(error);
-
-    alert(error);
+    }
 
 }
 
-}
-
-
-// -------------------------------
 // Logout
-// -------------------------------
 
 function logout() {
 
     localStorage.removeItem("access_token");
-
     window.location.href = "login.html";
 
 }

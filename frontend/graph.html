@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,24 +6,11 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Graph Analytics</title>
+    <title>SentinelAI - Graph Analytics</title>
 
-    <link rel="stylesheet"
-          href="css/style.css">
-
-    <!-- vis-network Library -->
-
-    <script
-        type="text/javascript"
-        src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js">
-    </script>
-
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/vis-network@9.1.2/dist/dist/vis-network.min.css">
+    <link rel="stylesheet" href="css/style.css">
 
 </head>
 
@@ -46,16 +34,7 @@
 
             <li><a href="explanation.html">AI Explanation</a></li>
 
-            <li>
-
-                <a href="#"
-                   onclick="logout()">
-
-                    Logout
-
-                </a>
-
-            </li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
 
         </ul>
 
@@ -65,80 +44,118 @@
 
     <div class="container">
 
-        <h1>
-
-            Fraud Network Graph
-
-        </h1>
-     
-
-<br>
-        <p>
-
-            Interactive visualization of transactions.
-
-        </p>
+        <h1>Fraud Network Graph Analytics</h1>
 
         <br>
-        <div class="summary">
 
-    <div class="card">
+        <button type="button" onclick="loadGraphData()">Refresh Graph Data</button>
 
-        <h3>Total Accounts</h3>
+        <br><br>
 
-        <h2 id="accounts">0</h2>
+        <!-- Loading -->
 
-    </div>
+        <div id="loading" style="display:none;">
 
-    <div class="card">
+            <h3>Analyzing Transaction Network...</h3>
 
-        <h3>Total Transactions</h3>
+        </div>
 
-        <h2 id="transactions">0</h2>
+        <!-- Summary -->
 
-    </div>
+        <div class="dashboard">
 
-    <div class="card">
+            <div class="stat-card">
+                <h3>Total Accounts</h3>
+                <h1 id="totalAccounts">0</h1>
+            </div>
 
-        <h3>Connections</h3>
+            <div class="stat-card">
+                <h3>Total Transactions</h3>
+                <h1 id="totalTransactions">0</h1>
+            </div>
 
-        <h2 id="connections">0</h2>
+            <div class="stat-card">
+                <h3>Total Connections</h3>
+                <h1 id="totalConnections">0</h1>
+            </div>
 
-    </div>
+        </div>
 
-</div>
+        <br>
 
-<br>
-<div class="legend">
+        <!-- Highly Connected Accounts -->
 
-    <span style="color:red;">⬤ Fraud Account</span>
+        <div class="card">
 
-    &nbsp;&nbsp;
+            <h2>Highly Connected Accounts</h2>
 
-    <span style="color:green;">⬤ Safe Account</span>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Connections</th>
+                    </tr>
+                </thead>
+                <tbody id="highlyConnectedTable">
+                </tbody>
+            </table>
 
-    &nbsp;&nbsp;
+        </div>
 
-    <span style="color:blue;">⬤ Receiver</span>
+        <br>
 
-</div>
+        <!-- Mule Accounts -->
 
-<br>
+        <div class="card">
 
-<input
+            <h2>Suspected Mule Accounts</h2>
 
-type="text"
+            <p>Accounts receiving funds from 2 or more distinct senders.</p>
 
-id="searchAccount"
+            <br>
 
-placeholder="Search Account">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Received From (Senders)</th>
+                    </tr>
+                </thead>
+                <tbody id="muleAccountsTable">
+                </tbody>
+            </table>
 
-<button onclick="searchNode()">
+        </div>
 
-Search
+        <br>
 
-</button>
-        <div id="network"></div>
+        <!-- Fraud Rings -->
+
+        <div class="card">
+
+            <h2>Fraud Rings (Circular Transfer Cycles)</h2>
+
+            <p>Groups of accounts forming a closed loop of transfers (A &rarr; B &rarr; C &rarr; A).</p>
+
+            <br>
+
+            <ul id="fraudRingsList">
+            </ul>
+
+        </div>
+
+        <br>
+
+        <!-- Circular Transfers -->
+
+        <div class="card">
+
+            <h2>Circular Transfers</h2>
+
+            <ul id="circularTransfersList">
+            </ul>
+
+        </div>
 
     </div>
 

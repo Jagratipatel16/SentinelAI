@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,13 +6,11 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CSV Upload</title>
+    <title>SentinelAI - Upload CSV</title>
 
-    <link rel="stylesheet"
-          href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 
 </head>
 
@@ -35,9 +34,7 @@
 
             <li><a href="explanation.html">AI Explanation</a></li>
 
-            <li>
-                <a href="#" onclick="logout()">Logout</a>
-            </li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
 
         </ul>
 
@@ -47,87 +44,63 @@
 
     <div class="container">
 
-        <h1>Batch Fraud Detection</h1>
-
-        <p>
-
-            Upload a CSV file for fraud detection.
-
-        </p>
+        <h1>Upload Transaction CSV</h1>
 
         <br>
 
-        <input
-            type="file"
-            id="csvFile"
-            accept=".csv">
-
-        <br><br>
-
-        <button
-            onclick="uploadCSV()">
-
-            Upload CSV
-
-        </button>
-
-        <br><br>
-
-        <!-- Loading -->
-
-        <div
-            id="loading"
-            style="display:none;">
-
-            <h3>
-
-                Processing CSV...
-
-            </h3>
-
-        </div>
-
-        <!-- Result -->
-
-<div id="resultCard"
-     class="result-card summary-card"
-     style="display:none;">
-
-            <h2>Upload Summary</h2>
+        <div class="card">
 
             <p>
-
-                <strong>Total Records :</strong>
-
-                <span id="totalRecords">0</span>
-
-            </p>
-
-            <p>
-
-                <strong>Fraud Transactions :</strong>
-
-                <span id="fraudRecords">0</span>
-
-            </p>
-
-            <p>
-
-                <strong>Safe Transactions :</strong>
-
-                <span id="safeRecords">0</span>
-
+                Upload a CSV file containing transactions. Required columns:
+                <code>step, type, amount, oldbalanceOrg, newbalanceOrig, oldbalanceDest, newbalanceDest, isFlaggedFraud</code>
             </p>
 
             <br>
 
-            <button
-                id="downloadBtn"
-                style="display:none;">
+            <input type="file" id="csvFile" accept=".csv">
 
-                Download Result CSV
+            <button type="button" onclick="uploadCsv()">Upload &amp; Predict</button>
 
-            </button>
+        </div>
+
+        <!-- Loading -->
+
+        <div id="loading" style="display:none;">
+
+            <h3>Processing CSV...</h3>
+
+        </div>
+
+        <!-- Result Card -->
+
+        <div id="resultCard" class="result-card" style="display:none;">
+
+            <h2>Upload Summary</h2>
+
+            <div class="dashboard">
+
+                <div class="stat-card">
+                    <h3>Total Records</h3>
+                    <h1 id="totalRecords">0</h1>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Fraud Transactions</h3>
+                    <h1 id="fraudCount">0</h1>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Safe Transactions</h3>
+                    <h1 id="safeCount">0</h1>
+                </div>
+
+            </div>
+
+            <br>
+
+            <a id="downloadLink" href="#">
+                <button type="button">Download Results CSV</button>
+            </a>
 
         </div>
 

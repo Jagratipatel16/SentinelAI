@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,10 +6,9 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AI Transaction Explanation</title>
+    <title>SentinelAI - AI Explanation</title>
 
     <link rel="stylesheet" href="css/style.css">
 
@@ -34,9 +34,7 @@
 
             <li><a href="explanation.html">AI Explanation</a></li>
 
-            <li>
-                <a href="#" onclick="logout()">Logout</a>
-            </li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
 
         </ul>
 
@@ -46,138 +44,102 @@
 
     <div class="container">
 
-        <h1>AI Transaction Explanation</h1>
+        <h1>AI Fraud Explanation</h1>
+
+        <p>Enter transaction details to get a plain-language, LLM-generated explanation of the risk.</p>
+
+        <br>
 
         <form id="explanationForm">
 
             <label>Step</label>
-            <input type="number"
-                   id="step"
-                   required>
+            <input type="number" id="step" required>
 
             <label>Transaction Type</label>
 
             <select id="type">
 
                 <option value="0">CASH_IN</option>
+
                 <option value="1">CASH_OUT</option>
+
                 <option value="2">DEBIT</option>
+
                 <option value="3">PAYMENT</option>
+
                 <option value="4">TRANSFER</option>
 
             </select>
 
             <label>Amount</label>
-            <input type="number"
-                   id="amount"
-                   required>
+            <input type="number" id="amount" required>
 
             <label>Old Balance Sender</label>
-            <input type="number"
-                   id="oldbalanceOrg"
-                   required>
+            <input type="number" id="oldbalanceOrg" required>
 
             <label>New Balance Sender</label>
-            <input type="number"
-                   id="newbalanceOrig"
-                   required>
+            <input type="number" id="newbalanceOrig" required>
 
             <label>Old Balance Receiver</label>
-            <input type="number"
-                   id="oldbalanceDest"
-                   required>
+            <input type="number" id="oldbalanceDest" required>
 
             <label>New Balance Receiver</label>
-            <input type="number"
-                   id="newbalanceDest"
-                   required>
+            <input type="number" id="newbalanceDest" required>
 
             <label>Flagged Fraud</label>
 
             <select id="isFlaggedFraud">
 
                 <option value="0">No</option>
+
                 <option value="1">Yes</option>
 
             </select>
 
             <br><br>
 
-            <button
-                type="button"
-                onclick="getExplanation()">
-
-                Explain Transaction
-
+            <button type="button" onclick="explainTransaction()">
+                Get AI Explanation
             </button>
 
         </form>
 
-        <br>
+        <hr>
+
+        <!-- Loading -->
+
+        <div id="loading" style="display:none;">
+
+            <h3>Asking AI to explain this transaction...</h3>
+
+        </div>
 
         <!-- Result Card -->
 
-        <div id="resultCard"
-             class="result-card"
-             style="display:none;">
+        <div id="resultCard" class="result-card" style="display:none;">
 
-            <h2>Prediction Result</h2>
-
-            <h1 id="prediction">-</h1>
+            <h2>AI Explanation Result</h2>
 
             <p>
-
-                <b>Risk Score :</b>
-
-                <span id="riskScore">
-
-                    0%
-
-                </span>
-
+                <strong>Status :</strong>
+                <span id="prediction"></span>
             </p>
 
-            <!-- Progress Bar -->
+            <p>
+                <strong>Risk Score :</strong>
+                <span id="riskScore"></span> %
+            </p>
 
-            <div class="progress">
+            <hr>
 
-                <div id="progressBar"
-                     class="progress-bar">
+            <h3>Reasons</h3>
 
-                </div>
-
-            </div>
-
-        </div>
-
-        <br>
-
-        <!-- AI Reasons -->
-
-        <div id="reasonCard"
-             class="reason-card"
-             style="display:none;">
-
-            <h2>AI Explanation</h2>
-
-            <ul id="reasonList">
-
+            <ul id="reasons">
             </ul>
 
-        </div>
-
-        <br>
-
-        <!-- Recommendation -->
-
-        <div id="recommendationCard"
-             class="recommendation-card"
-             style="display:none;">
-
-            <h2>💡 Recommendation</h2>
-
-            <p id="recommendation">
-
+            <p>
+                <strong>Recommendation :</strong>
+                <span id="recommendation"></span>
             </p>
 
         </div>

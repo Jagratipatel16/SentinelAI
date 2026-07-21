@@ -1,8 +1,7 @@
+
 const API_URL = "http://127.0.0.1:8000";
 
-// -------------------------------
 // Check Login
-// -------------------------------
 
 const token = localStorage.getItem("access_token");
 
@@ -12,243 +11,174 @@ if (!token) {
 
 }
 
-let network;
-let graphData;
-// -------------------------------
-// Load Graph
-// -------------------------------
+// Fetch helper with auth header
 
-async function loadGraph() {
+async function fetchJson(path) {
 
-    try {
+    const response = await fetch(
 
-        const response = await fetch(
+        API_URL + path,
 
-            API_URL + "/graph/network",
-
-            {
-
-                method: "GET",
-
-                headers: {
-
-                    "Authorization": "Bearer " + token
-
-                }
-
+        {
+            headers: {
+                "Authorization": "Bearer " + token
             }
-
-        );
-
-        const data = await response.json();
-
-        console.log(data);
-
-        const container = document.getElementById("network");
-
-          graphData = {
-
-            nodes: new vis.DataSet(data.nodes),
-
-            edges: new vis.DataSet(data.edges)
-
-        };
-
-const options = {
-
-    layout: {
-
-        improvedLayout: true
-
-    },
-
-    nodes: {
-
-        shape: "dot",
-
-        size: 22,
-
-        borderWidth: 2,
-
-        font: {
-
-            size: 16,
-
-            color: "#000"
-
         }
 
-    },
+    );
 
-    edges: {
+    if (!response.ok) {
 
-        arrows: {
-
-            to: {
-
-                enabled: true
-
-            }
-
-        },
-
-        smooth: {
-
-            enabled: true,
-
-            type: "dynamic"
-
-        },
-
-        font: {
-
-            size: 14,
-
-            align: "top"
-
-        },
-
-        color: {
-
-            color: "#666"
-
-        }
-
-    },
-
-    physics: {
-
-        enabled: true,
-
-        barnesHut: {
-
-            gravitationalConstant: -8000,
-
-            centralGravity: 0.3,
-
-            springLength: 180,
-
-            springConstant: 0.04,
-
-            damping: 0.09
-
-        }
-
-    },
-
-    interaction: {
-
-        hover: true,
-
-        navigationButtons: true,
-
-        keyboard: true
+        throw new Error("Request failed: " + path);
 
     }
 
-};
-network = new vis.Network(
+    return response.json();
 
-    container,
+}
 
-    graphData,
+// Load All Graph Data
 
-    options
+async function loadGraphData() {
 
-);
+    document.getElementById("loading").style.display = "block";
 
-network.fit();
+    try {
+
+        const [summary, highlyConnected, muleAccounts, fraudRings, circularTransfers] =
+            await Promise.all([
+
+                fetchJson("/graph/summary"),
+                fetchJson("/graph/highly-connected"),
+                fetchJson("/graph/mule-accounts"),
+                fetchJson("/graph/fraud-rings"),
+                fetchJson("/graph/circular-transfers")
+
+            ]);
+
+        // ---------------- Summary ----------------
+
+        document.getElementById("totalAccounts").innerHTML =
+            summary.total_accounts;
+
+        document.getElementById("totalTransactions").innerHTML =
+            summary.total_transactions;
+
+        document.getElementById("totalConnections").innerHTML =
+            summary.connections;
+
+        // ---------------- Highly Connected Accounts ----------------
+
+        const highlyConnectedTable = document.getElementById("highlyConnectedTable");
+        highlyConnectedTable.innerHTML = "";
+
+        if (highlyConnected.length === 0) {
+
+            highlyConnectedTable.innerHTML =
+                "<tr><td colspan='2'>No data available.</td></tr>";
+
+        }
+
+        highlyConnected.forEach(item => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML =
+                "<td>" + item.account + "</td>" +
+                "<td>" + item.connections + "</td>";
+
+            highlyConnectedTable.appendChild(row);
+
+        });
+
+        // ---------------- Mule Accounts ----------------
+
+        const muleTable = document.getElementById("muleAccountsTable");
+        muleTable.innerHTML = "";
+
+        if (muleAccounts.length === 0) {
+
+            muleTable.innerHTML =
+                "<tr><td colspan='2'>No suspected mule accounts found.</td></tr>";
+
+        }
+
+        muleAccounts.forEach(item => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML =
+                "<td>" + item.account + "</td>" +
+                "<td>" + item.received_from + "</td>";
+
+            muleTable.appendChild(row);
+
+        });
+
+        // ---------------- Fraud Rings ----------------
+
+        const ringsList = document.getElementById("fraudRingsList");
+        ringsList.innerHTML = "";
+
+        if (fraudRings.length === 0) {
+
+            ringsList.innerHTML = "<li>No fraud rings detected.</li>";
+
+        }
+
+        fraudRings.forEach(ring => {
+
+            const li = document.createElement("li");
+            li.textContent = ring.join(" -> ") + " -> " + ring[0];
+            ringsList.appendChild(li);
+
+        });
+
+        // ---------------- Circular Transfers ----------------
+
+        const circularList = document.getElementById("circularTransfersList");
+        circularList.innerHTML = "";
+
+        if (circularTransfers.length === 0) {
+
+            circularList.innerHTML = "<li>No circular transfers detected.</li>";
+
+        }
+
+        circularTransfers.forEach(cycle => {
+
+            const li = document.createElement("li");
+            li.textContent = cycle.join(" -> ") + " -> " + cycle[0];
+            circularList.appendChild(li);
+
+        });
+
     }
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+        alert("Unable to load graph data.");
 
-        alert("Unable to load graph.");
+    }
+
+    finally {
+
+        document.getElementById("loading").style.display = "none";
 
     }
 
 }
 
-
-// -------------------------------
 // Logout
-// -------------------------------
 
 function logout() {
 
     localStorage.removeItem("access_token");
-
     window.location.href = "login.html";
 
 }
 
-const summaryResponse = await fetch(
-
-    API_URL + "/graph/summary",
-
-    {
-
-        headers: {
-
-            "Authorization":"Bearer "+token
-
-        }
-
-    }
-
-);
-
-const summary = await summaryResponse.json();
-
-document.getElementById("accounts").innerHTML =
-summary.total_accounts;
-
-document.getElementById("transactions").innerHTML =
-summary.total_transactions;
-
-document.getElementById("connections").innerHTML =
-summary.connections;
-
-
-
-function searchNode(){
-
-    const account=document
-
-    .getElementById("searchAccount")
-
-    .value;
-
-    const id=graphData.nodes.get(account);
-
-    if(id){
-
-        network.focus(
-
-            account,
-
-            {
-
-                scale:1.6,
-
-                animation:true
-
-            }
-
-        );
-
-    }
-
-    else{
-
-        alert("Account Not Found");
-
-    }
-
-}
-// -------------------------------
 // Load Automatically
-// -------------------------------
 
-loadGraph();
+loadGraphData();
