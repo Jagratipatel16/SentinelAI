@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Transaction Explanation</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    <!-- Navbar -->
+
+    <nav>
+
+        <h2>SentinelAI</h2>
+
+        <ul>
+
+            <li><a href="dashboard.html">Dashboard</a></li>
+
+            <li><a href="predict.html">Predict</a></li>
+
+            <li><a href="upload.html">Upload CSV</a></li>
+
+            <li><a href="graph.html">Graph</a></li>
+
+            <li><a href="explanation.html">AI Explanation</a></li>
+
+            <li>
+                <a href="#" onclick="logout()">Logout</a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <!-- Main Container -->
+
+    <div class="container">
+
+        <h1>AI Transaction Explanation</h1>
+
+        <form id="explanationForm">
+
+            <label>Step</label>
+            <input type="number"
+                   id="step"
+                   required>
+
+            <label>Transaction Type</label>
+
+            <select id="type">
+
+                <option value="0">CASH_IN</option>
+                <option value="1">CASH_OUT</option>
+                <option value="2">DEBIT</option>
+                <option value="3">PAYMENT</option>
+                <option value="4">TRANSFER</option>
+
+            </select>
+
+            <label>Amount</label>
+            <input type="number"
+                   id="amount"
+                   required>
+
+            <label>Old Balance Sender</label>
+            <input type="number"
+                   id="oldbalanceOrg"
+                   required>
+
+            <label>New Balance Sender</label>
+            <input type="number"
+                   id="newbalanceOrig"
+                   required>
+
+            <label>Old Balance Receiver</label>
+            <input type="number"
+                   id="oldbalanceDest"
+                   required>
+
+            <label>New Balance Receiver</label>
+            <input type="number"
+                   id="newbalanceDest"
+                   required>
+
+            <label>Flagged Fraud</label>
+
+            <select id="isFlaggedFraud">
+
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+
+            </select>
+
+            <br><br>
+
+            <button
+                type="button"
+                onclick="getExplanation()">
+
+                Explain Transaction
+
+            </button>
+
+        </form>
+
+        <br>
+
+        <!-- Result Card -->
+
+        <div id="resultCard"
+             class="result-card"
+             style="display:none;">
+
+            <h2>Prediction Result</h2>
+
+            <h1 id="prediction">-</h1>
+
+            <p>
+
+                <b>Risk Score :</b>
+
+                <span id="riskScore">
+
+                    0%
+
+                </span>
+
+            </p>
+
+            <!-- Progress Bar -->
+
+            <div class="progress">
+
+                <div id="progressBar"
+                     class="progress-bar">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <!-- AI Reasons -->
+
+        <div id="reasonCard"
+             class="reason-card"
+             style="display:none;">
+
+            <h2>AI Explanation</h2>
+
+            <ul id="reasonList">
+
+            </ul>
+
+        </div>
+
+        <br>
+
+        <!-- Recommendation -->
+
+        <div id="recommendationCard"
+             class="recommendation-card"
+             style="display:none;">
+
+            <h2>💡 Recommendation</h2>
+
+            <p id="recommendation">
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <script src="js/explanation.js"></script>
+
+</body>
+
+</html>

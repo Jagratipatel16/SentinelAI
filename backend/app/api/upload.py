@@ -15,62 +15,29 @@ router = APIRouter(
 )
 
 
-@router.post(
+@router.post("/", response_model=UploadResponse)
+def upload_csv(file: UploadFile = File(...)):
 
-    "/",
+    try:
 
-    response_model=UploadResponse
+        if not file.filename.endswith(".csv"):
 
-)
+            raise HTTPException(
+                status_code=400,
+                detail="Please upload a CSV file."
+            )
 
-def upload_csv(
+        result = process_csv(file)
 
-    file: UploadFile = File(...)
+        return result
 
-):
+    except Exception as e:
 
-    # Check CSV File
-
-    if not file.filename.endswith(".csv"):
-
-        raise HTTPException(
-
-            status_code=400,
-
-            detail="Please upload a CSV file."
-
-        )
-
-    # Process CSV
-
-    result = process_csv(file)
-
-    return result
-
-@router.get("/download/{filename}")
-
-def download_file(filename: str):
-
-    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-    file_path = os.path.join(
-
-        BASE_DIR,
-
-        "uploads",
-
-        filename
-
-    )
-
-    if not os.path.exists(file_path):
+        print("UPLOAD ERROR:", str(e))
 
         raise HTTPException(
-
-            status_code=404,
-
-            detail="File not found."
-
+            status_code=500,
+            detail=str(e)
         )
 
     return FileResponse(

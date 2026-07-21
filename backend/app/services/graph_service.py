@@ -6,7 +6,7 @@ from app.models.transaction import Transaction
 
 
 # ----------------------------------------
-# Create Graph
+# Create NetworkX Graph
 # ----------------------------------------
 
 def build_graph(db: Session):
@@ -23,9 +23,7 @@ def build_graph(db: Session):
             transaction.receiver,
 
             amount=transaction.amount,
-
             transaction_type=transaction.transaction_type,
-
             status=transaction.status
 
         )
@@ -64,13 +62,11 @@ def get_highly_connected_accounts(db: Session):
 
     for node in G.nodes():
 
-        connections = G.degree(node)
-
         accounts.append({
 
             "account": node,
 
-            "connections": connections
+            "connections": G.degree(node)
 
         })
 
@@ -128,9 +124,7 @@ def get_fraud_rings(db: Session):
 
     G = build_graph(db)
 
-    rings = list(nx.simple_cycles(G))
-
-    return rings
+    return list(nx.simple_cycles(G))
 
 
 # ----------------------------------------
@@ -141,6 +135,111 @@ def get_circular_transfers(db: Session):
 
     G = build_graph(db)
 
-    cycles = list(nx.simple_cycles(G))
+    return list(nx.simple_cycles(G))
 
-    return cycles
+
+# ----------------------------------------
+# Network Graph
+# ----------------------------------------
+
+def get_network_graph(db: Session):
+
+    transactions = db.query(Transaction).all()
+
+    nodes = {}
+
+    edges = []
+
+    for transaction in transactions:
+
+        sender = transaction.sender
+
+        receiver = transaction.receiver
+
+        # ---------------- Sender Node ----------------
+
+        if sender not in nodes:
+
+            nodes[sender] = {
+
+                "id": sender,
+
+                "label": sender,
+
+                "color": "#4CAF50",
+
+                "size": 20
+
+            }
+
+        # ---------------- Receiver Node ----------------
+
+        if receiver not in nodes:
+
+            nodes[receiver] = {
+
+                "id": receiver,
+
+                "label": receiver,
+
+                "color": "#2196F3",
+
+                "size": 20
+
+            }
+
+        # ---------------- Fraud Highlight ----------------
+
+        if transaction.status == "Fraud":
+
+            nodes[sender]["color"] = "#F44336"
+
+            nodes[sender]["size"] = 35
+
+            nodes[receiver]["color"] = "#F44336"
+
+            nodes[receiver]["size"] = 35
+
+        # ---------------- Edge ----------------
+
+        edges.append({
+
+            "from": sender,
+
+            "to": receiver,
+
+            "label": str(transaction.amount),
+
+            "title": f"""
+<b>Transaction Details</b><br><br>
+
+Sender : {sender}<br>
+
+Receiver : {receiver}<br>
+
+Type : {transaction.transaction_type}<br>
+
+Amount : ₹{transaction.amount}<br>
+
+Status : {transaction.status}
+""",
+
+            "arrows": "to",
+
+            "smooth": {
+
+                "type": "curvedCW",
+
+                "roundness": 0.2
+
+            }
+
+        })
+
+    return {
+
+        "nodes": list(nodes.values()),
+
+        "edges": edges
+
+    }

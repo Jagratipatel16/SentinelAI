@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>CSV Upload</title>
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
+</head>
+
+<body>
+
+    <!-- Navbar -->
+
+    <nav>
+
+        <h2>SentinelAI</h2>
+
+        <ul>
+
+            <li><a href="dashboard.html">Dashboard</a></li>
+
+            <li><a href="predict.html">Predict</a></li>
+
+            <li><a href="upload.html">Upload CSV</a></li>
+
+            <li><a href="graph.html">Graph</a></li>
+
+            <li><a href="explanation.html">AI Explanation</a></li>
+
+            <li>
+                <a href="#" onclick="logout()">Logout</a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <!-- Main Container -->
+
+    <div class="container">
+
+        <h1>Batch Fraud Detection</h1>
+
+        <p>
+
+            Upload a CSV file for fraud detection.
+
+        </p>
+
+        <br>
+
+        <input
+            type="file"
+            id="csvFile"
+            accept=".csv">
+
+        <br><br>
+
+        <button
+            onclick="uploadCSV()">
+
+            Upload CSV
+
+        </button>
+
+        <br><br>
+
+        <!-- Loading -->
+
+        <div
+            id="loading"
+            style="display:none;">
+
+            <h3>
+
+                Processing CSV...
+
+            </h3>
+
+        </div>
+
+        <!-- Result -->
+
+<div id="resultCard"
+     class="result-card summary-card"
+     style="display:none;">
+
+            <h2>Upload Summary</h2>
+
+            <p>
+
+                <strong>Total Records :</strong>
+
+                <span id="totalRecords">0</span>
+
+            </p>
+
+            <p>
+
+                <strong>Fraud Transactions :</strong>
+
+                <span id="fraudRecords">0</span>
+
+            </p>
+
+            <p>
+
+                <strong>Safe Transactions :</strong>
+
+                <span id="safeRecords">0</span>
+
+            </p>
+
+            <br>
+
+            <button
+                id="downloadBtn"
+                style="display:none;">
+
+                Download Result CSV
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <script src="js/upload.js"></script>
+
+</body>
+
+</html>

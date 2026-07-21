@@ -8,7 +8,8 @@ from app.services.graph_service import (
     get_highly_connected_accounts,
     get_mule_accounts,
     get_fraud_rings,
-    get_circular_transfers
+    get_circular_transfers,
+    get_network_graph
 )
 
 router = APIRouter(
@@ -65,3 +66,12 @@ def fraud_rings(db: Session = Depends(get_db)):
 def circular_transfers(db: Session = Depends(get_db)):
 
     return get_circular_transfers(db)
+
+# --------------------------------------------------
+# Network Graph Data
+# --------------------------------------------------
+
+@router.get("/network")
+def network_graph(db: Session = Depends(get_db)):
+
+    return get_network_graph(db)
