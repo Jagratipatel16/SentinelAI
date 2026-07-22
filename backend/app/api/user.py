@@ -5,7 +5,7 @@ from app.database.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.core.security import hash_password
-from app.core.dependencies import get_current_user
+from app.core.auth import get_current_user
 
 router = APIRouter(
     prefix="/users",
@@ -14,6 +14,15 @@ router = APIRouter(
 
 @router.post("/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+
+    existing_user = db.query(User).filter(User.email == user.email).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="An account with this email already exists."
+        )
+
     db_user = User(
         username=user.username,
         email=user.email,
@@ -33,11 +42,13 @@ def get_users(db: Session = Depends(get_db)):
 
 @router.get("/me")
 def current_user(
-    email: str = Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     return {
-        "email": email,
-        "message": "Authorized User"
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "role": user.role
     }
 
 @router.get("/{user_id}", response_model=UserResponse)

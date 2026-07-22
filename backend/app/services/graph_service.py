@@ -119,17 +119,47 @@ def get_mule_accounts(db: Session):
 # ----------------------------------------
 # Fraud Rings
 # ----------------------------------------
+# A "fraud ring" is a circular transfer pattern (A -> B -> C -> A) where at
+# least one transaction along the cycle was predicted/marked as "Fraud".
+# This is a more actionable subset of circular_transfers below - it points
+# investigators straight at loops that involve a confirmed-risky transaction,
+# instead of every closed loop in the network (many of which may be
+# legitimate, e.g. recurring payments between the same small group of users).
 
 def get_fraud_rings(db: Session):
 
     G = build_graph(db)
 
-    return list(nx.simple_cycles(G))
+    rings = []
+
+    for cycle in nx.simple_cycles(G):
+
+        has_fraud_edge = False
+
+        for i in range(len(cycle)):
+
+            source = cycle[i]
+            target = cycle[(i + 1) % len(cycle)]
+
+            edge_data = G.get_edge_data(source, target)
+
+            if edge_data and edge_data.get("status") == "Fraud":
+                has_fraud_edge = True
+                break
+
+        if has_fraud_edge:
+            rings.append(cycle)
+
+    return rings
 
 
 # ----------------------------------------
 # Circular Transfers
 # ----------------------------------------
+# All closed-loop transfer patterns in the network, regardless of fraud
+# status. This is the broader signal (fraud_rings is a filtered subset of
+# this) - useful for spotting unusual money-movement structures even before
+# the ML model has flagged any single transaction as fraudulent.
 
 def get_circular_transfers(db: Session):
 

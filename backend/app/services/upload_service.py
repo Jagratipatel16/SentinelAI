@@ -3,6 +3,8 @@ import uuid
 import joblib
 import pandas as pd
 
+from app.models.transaction import Transaction
+
 # --------------------------------------------------
 # Load Trained Model
 # --------------------------------------------------
@@ -44,7 +46,7 @@ os.makedirs(
 # Process Uploaded CSV
 # --------------------------------------------------
 
-def process_csv(file):
+def process_csv(file, db=None):
 
     # ---------- Save Uploaded File ----------
 
@@ -150,6 +152,34 @@ def process_csv(file):
         index=False
 
     )
+
+    # ---------- Persist to MySQL so Dashboard & Graph Analytics can use it ----------
+    # nameOrig/nameDest are the account-id columns from the raw PaySim CSV.
+    # If they aren't present, we fall back to generated per-row account ids
+    # so the upload still succeeds, but graph analytics won't find
+    # meaningful shared connections.
+
+    if db is not None:
+
+        has_accounts = "nameOrig" in df.columns and "nameDest" in df.columns
+
+        for idx, row in df.iterrows():
+
+            sender = row["nameOrig"] if has_accounts else f"ACC{idx}_SRC"
+            receiver = row["nameDest"] if has_accounts else f"ACC{idx}_DST"
+
+            db_transaction = Transaction(
+                sender=str(sender),
+                receiver=str(receiver),
+                amount=float(row["amount"]),
+                transaction_type=str(row["type"]),
+                status=row["Prediction"],
+                user_id=None
+            )
+
+            db.add(db_transaction)
+
+        db.commit()
 
     # ---------- Summary ----------
 
