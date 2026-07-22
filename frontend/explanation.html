@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -98,21 +97,13 @@
 
             <br><br>
 
-            <button type="button" onclick="explainTransaction()">
+            <button type="button" onclick="getExplanation()">
                 Get AI Explanation
             </button>
 
         </form>
 
         <hr>
-
-        <!-- Loading -->
-
-        <div id="loading" style="display:none;">
-
-            <h3>Asking AI to explain this transaction...</h3>
-
-        </div>
 
         <!-- Result Card -->
 
@@ -127,20 +118,39 @@
 
             <p>
                 <strong>Risk Score :</strong>
-                <span id="riskScore"></span> %
+                <span id="riskScore"></span>
             </p>
 
-            <hr>
+            <div class="progress">
 
-            <h3>Reasons</h3>
+                <div id="progressBar" class="progress-bar">0%</div>
 
-            <ul id="reasons">
+            </div>
+
+        </div>
+
+        <br>
+
+        <!-- Reason Card -->
+
+        <div id="reasonCard" class="reason-card" style="display:none;">
+
+            <h2>Reasons</h2>
+
+            <ul id="reasonList">
             </ul>
 
-            <p>
-                <strong>Recommendation :</strong>
-                <span id="recommendation"></span>
-            </p>
+        </div>
+
+        <br>
+
+        <!-- Recommendation Card -->
+
+        <div id="recommendationCard" class="recommendation-card" style="display:none;">
+
+            <h2>Recommendation</h2>
+
+            <p id="recommendation"></p>
 
         </div>
 

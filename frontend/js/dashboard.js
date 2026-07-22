@@ -22,6 +22,13 @@ async function loadDashboard() {
 
         );
 
+        if (!response.ok) {
+
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || "Failed to load dashboard data.");
+
+        }
+
         const data = await response.json();
 
         console.log(data);
@@ -53,7 +60,7 @@ async function loadDashboard() {
 
         console.error(error);
 
-        alert("Unable to load dashboard.");
+        alert(error.message || "Unable to load dashboard.");
 
     }
 

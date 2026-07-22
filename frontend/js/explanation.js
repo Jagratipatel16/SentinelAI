@@ -63,6 +63,13 @@ async function getExplanation() {
 
         );
 
+        if (!response.ok) {
+
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || "Explanation request failed.");
+
+        }
+
         const data = await response.json();
 
         console.log(data);
@@ -163,7 +170,7 @@ async function getExplanation() {
 
         console.log(error);
 
-        alert("Unable to get explanation.");
+        alert(error.message || "Unable to get explanation.");
 
     }
 

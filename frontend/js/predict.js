@@ -69,6 +69,13 @@ async function predictTransaction() {
 
         );
 
+        if (!response.ok) {
+
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || "Prediction request failed.");
+
+        }
+
         const result = await response.json();
 
         //---------------- AI Explanation API ----------------//
@@ -94,6 +101,13 @@ async function predictTransaction() {
             }
 
         );
+
+        if (!explanationResponse.ok) {
+
+            const errorData = await explanationResponse.json().catch(() => ({}));
+            throw new Error(errorData.detail || "Explanation request failed.");
+
+        }
 
         const explanation = await explanationResponse.json();
 
@@ -167,7 +181,7 @@ async function predictTransaction() {
 
         document.getElementById("loading").style.display = "none";
 
-        alert("Prediction Failed.");
+        alert(error.message || "Prediction Failed.");
 
     }
 
