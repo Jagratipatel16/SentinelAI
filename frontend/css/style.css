@@ -484,3 +484,41 @@ input[type="file"]{
     color:orange;
 
 }
+
+/* Tabs (AI Explanation page) */
+
+.tabs {
+
+    display: flex;
+
+    gap: 10px;
+
+    border-bottom: 2px solid #ddd;
+
+}
+
+.tab-btn {
+
+    padding: 10px 20px;
+
+    border: none;
+
+    background: none;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    color: #555;
+
+    border-bottom: 3px solid transparent;
+
+}
+
+.tab-btn.active {
+
+    color: #1a237e;
+
+    border-bottom: 3px solid #1a237e;
+
+}

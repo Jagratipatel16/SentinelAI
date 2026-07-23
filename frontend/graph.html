@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -77,6 +76,54 @@
             <div class="stat-card">
                 <h3>Total Connections</h3>
                 <h1 id="totalConnections">0</h1>
+            </div>
+
+        </div>
+
+        <br>
+
+        <!-- Network Diagram -->
+
+        <div class="card">
+
+            <h2>Transaction Network Diagram</h2>
+
+            <p>Accounts (circles) connected by transactions (lines). Red circles were involved in a Fraud-predicted transaction.</p>
+
+            <br>
+
+            <div id="networkDiagramWrapper" style="overflow-x:auto;">
+
+                <svg id="networkSvg" width="800" height="500"></svg>
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <!-- AI Network Explanation -->
+
+        <div class="card">
+
+            <h2>AI Network Explanation</h2>
+
+            <p>Ask the AI to explain what these patterns mean in plain language.</p>
+
+            <br>
+
+            <button type="button" onclick="explainGraph()">Explain This Graph</button>
+
+            <br><br>
+
+            <div id="explainLoading" style="display:none;">
+                <p>Generating explanation...</p>
+            </div>
+
+            <div id="graphExplanationCard" class="recommendation-card" style="display:none;">
+
+                <p id="graphExplanationText"></p>
+
             </div>
 
         </div>

@@ -1,8 +1,18 @@
+import json
+
 import networkx as nx
+from groq import Groq
 
 from sqlalchemy.orm import Session
 
 from app.models.transaction import Transaction
+from app.core.config import settings
+
+# Groq client is created once and reused across requests. Reused for the
+# same LLM explanation pattern as ai_explanation.py, but kept separate here
+# since graph explanations summarize the whole network rather than a single
+# transaction.
+groq_client = Groq(api_key=settings.GROQ_API_KEY) if settings.GROQ_API_KEY else None
 
 
 # ----------------------------------------
@@ -273,3 +283,103 @@ Status : {transaction.status}
         "edges": edges
 
     }
+
+
+# ----------------------------------------
+# Explain Network (LLM)
+# ----------------------------------------
+# Summarizes the graph's key findings (summary stats, top connected
+# accounts, mule accounts, fraud rings) and asks the LLM to explain what's
+# happening in the network in plain language for a bank analyst. Falls back
+# to a simple templated summary if no API key is configured or the LLM
+# call fails, so the endpoint never breaks.
+
+def _fallback_network_explanation(summary, highly_connected, mule_accounts, fraud_rings):
+
+    lines = [
+        f"The network contains {summary['total_accounts']} accounts linked by "
+        f"{summary['total_transactions']} transactions."
+    ]
+
+    if mule_accounts:
+        top_mule = mule_accounts[0]
+        lines.append(
+            f"{len(mule_accounts)} account(s) show mule-like behavior, "
+            f"the most notable being '{top_mule['account']}' which received "
+            f"funds from {top_mule['received_from']} different senders."
+        )
+    else:
+        lines.append("No mule-like accounts were detected.")
+
+    if fraud_rings:
+        lines.append(
+            f"{len(fraud_rings)} circular transfer pattern(s) involving a "
+            f"fraud-flagged transaction were found, suggesting possible layering."
+        )
+    else:
+        lines.append("No circular fraud rings were detected.")
+
+    if highly_connected:
+        top_hub = highly_connected[0]
+        lines.append(
+            f"'{top_hub['account']}' is the most connected account in the "
+            f"network with {top_hub['connections']} connections."
+        )
+
+    return " ".join(lines)
+
+
+def explain_network(db: Session):
+
+    summary = get_graph_summary(db)
+    highly_connected = get_highly_connected_accounts(db)
+    mule_accounts = get_mule_accounts(db)
+    fraud_rings = get_fraud_rings(db)
+
+    if groq_client is None:
+        return {
+            "explanation": _fallback_network_explanation(
+                summary, highly_connected, mule_accounts, fraud_rings
+            )
+        }
+
+    prompt = f"""You are a fraud analyst assistant for a bank. Explain the following
+transaction network summary in plain, professional language for a bank employee
+reading a dashboard. Focus on what the patterns mean and why they might be
+worth investigating. Keep it to 3-5 sentences.
+
+Network summary:
+- Total accounts: {summary['total_accounts']}
+- Total transactions: {summary['total_transactions']}
+
+Top highly connected accounts (account, number of connections):
+{chr(10).join(f"- {a['account']}: {a['connections']}" for a in highly_connected[:5]) or "- None"}
+
+Suspected mule accounts (account, number of distinct senders):
+{chr(10).join(f"- {a['account']}: {a['received_from']}" for a in mule_accounts[:5]) or "- None"}
+
+Fraud rings detected (closed transfer loops involving a fraud-flagged transaction):
+{chr(10).join(" -> ".join(ring + [ring[0]]) for ring in fraud_rings[:5]) or "- None"}
+
+Respond with plain text only (no JSON, no markdown headers)."""
+
+    try:
+
+        response = groq_client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=300,
+        )
+
+        return {"explanation": response.choices[0].message.content.strip()}
+
+    except Exception as e:
+
+        print(f"[graph_service] LLM network explanation failed, using fallback: {e}")
+
+        return {
+            "explanation": _fallback_network_explanation(
+                summary, highly_connected, mule_accounts, fraud_rings
+            )
+        }

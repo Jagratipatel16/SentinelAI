@@ -16,4 +16,20 @@ class ExplanationResponse(BaseModel):
     risk_score: float
     reasons: list[str]
     recommendation: str
-    
+
+
+class BatchExplanationItem(BaseModel):
+    row: int
+    sender: str
+    receiver: str
+    amount: float
+    type: str
+    risk_score: float
+    reasons: list[str]
+    recommendation: str
+
+
+class BatchExplanationResponse(BaseModel):
+    total_records: int
+    fraud_count: int
+    explanations: list[BatchExplanationItem]

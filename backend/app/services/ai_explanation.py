@@ -1,8 +1,10 @@
 import json
 import os
+from types import SimpleNamespace
 
 import joblib
 import numpy as np
+import pandas as pd
 from groq import Groq
 
 from app.core.config import settings
@@ -15,7 +17,14 @@ MODEL_PATH = os.path.join(
     "fraud_model.pkl"
 )
 
+ENCODER_PATH = os.path.join(
+    BASE_DIR,
+    "models",
+    "type_encoder.pkl"
+)
+
 model = joblib.load(MODEL_PATH)
+type_encoder = joblib.load(ENCODER_PATH)
 
 # Groq client is created once and reused across requests
 groq_client = Groq(api_key=settings.GROQ_API_KEY) if settings.GROQ_API_KEY else None
@@ -164,3 +173,113 @@ def generate_explanation(data):
     except Exception as e:
         print(f"[ai_explanation] LLM call failed, using fallback: {e}")
         return _fallback_response(label, risk_score, flags)
+
+
+def generate_batch_explanation(file):
+    """
+    Reads an uploaded CSV, runs the fraud model on every row, and generates
+    an LLM explanation only for the rows predicted as "Fraud" (explaining
+    every row would mean one LLM call per row, which is slow and expensive
+    for larger files - the Safe rows aren't the ones an analyst needs help
+    understanding anyway).
+    """
+
+    df = pd.read_csv(file.file)
+
+    required_columns = [
+        "step", "type", "amount",
+        "oldbalanceOrg", "newbalanceOrig",
+        "oldbalanceDest", "newbalanceDest",
+        "isFlaggedFraud"
+    ]
+
+    missing = [c for c in required_columns if c not in df.columns]
+
+    if missing:
+        raise ValueError(
+            "CSV is missing required column(s): " + ", ".join(missing)
+        )
+
+    has_accounts = "nameOrig" in df.columns and "nameDest" in df.columns
+
+    X = df[required_columns].copy()
+
+    if not pd.api.types.is_numeric_dtype(X["type"]):
+
+        unknown_types = set(X["type"].astype(str).str.upper().unique()) - set(
+            type_encoder.classes_
+        )
+
+        if unknown_types:
+            raise ValueError(
+                "Unknown transaction type(s) in CSV: "
+                + ", ".join(unknown_types)
+                + ". Expected one of: "
+                + ", ".join(type_encoder.classes_)
+            )
+
+        X["type"] = type_encoder.transform(X["type"].astype(str).str.upper())
+
+    probabilities = model.predict_proba(X)[:, 1]
+
+    explanations = []
+    fraud_count = 0
+
+    for idx, probability in enumerate(probabilities):
+
+        risk_score = round(float(probability) * 100, 2)
+        label = "Fraud" if probability >= 0.5 else "Safe"
+
+        if label != "Fraud":
+            continue
+
+        fraud_count += 1
+
+        row = X.iloc[idx]
+
+        # SimpleNamespace mimics ExplanationRequest so we can reuse the
+        # same _rule_based_flags / _ask_llm helpers used for single
+        # transactions, instead of duplicating that logic here.
+        row_data = SimpleNamespace(
+            step=int(row["step"]),
+            type=int(row["type"]),
+            amount=float(row["amount"]),
+            oldbalanceOrg=float(row["oldbalanceOrg"]),
+            newbalanceOrig=float(row["newbalanceOrig"]),
+            oldbalanceDest=float(row["oldbalanceDest"]),
+            newbalanceDest=float(row["newbalanceDest"]),
+            isFlaggedFraud=int(row["isFlaggedFraud"])
+        )
+
+        flags = _rule_based_flags(row_data, probability)
+
+        if groq_client is None:
+            result = _fallback_response(label, risk_score, flags)
+        else:
+            try:
+                result = _ask_llm(row_data, label, risk_score, flags)
+            except Exception as e:
+                print(f"[ai_explanation] Batch LLM call failed on row {idx}, using fallback: {e}")
+                result = _fallback_response(label, risk_score, flags)
+
+        original_row = df.iloc[idx]
+
+        sender = original_row["nameOrig"] if has_accounts else f"ROW{idx}_SRC"
+        receiver = original_row["nameDest"] if has_accounts else f"ROW{idx}_DST"
+
+        explanations.append({
+            "row": idx,
+            "sender": str(sender),
+            "receiver": str(receiver),
+            "amount": float(original_row["amount"]),
+            "type": TRANSACTION_TYPE_LABELS.get(row_data.type, str(row_data.type)),
+            "risk_score": risk_score,
+            "reasons": result["reasons"],
+            "recommendation": result["recommendation"]
+        })
+
+    return {
+        "total_records": len(df),
+        "fraud_count": fraud_count,
+        "explanations": explanations
+    }

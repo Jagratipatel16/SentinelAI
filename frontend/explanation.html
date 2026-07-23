@@ -45,112 +45,216 @@
 
         <h1>AI Fraud Explanation</h1>
 
-        <p>Enter transaction details to get a plain-language, LLM-generated explanation of the risk.</p>
+        <p>Get a plain-language, LLM-generated explanation of the fraud risk - either for a single transaction, or for every risky transaction in an uploaded CSV.</p>
 
         <br>
 
-        <form id="explanationForm">
+        <!-- Tabs -->
 
-            <label>Step</label>
-            <input type="number" id="step" required>
+        <div class="tabs">
 
-            <label>Transaction Type</label>
-
-            <select id="type">
-
-                <option value="0">CASH_IN</option>
-
-                <option value="1">CASH_OUT</option>
-
-                <option value="2">DEBIT</option>
-
-                <option value="3">PAYMENT</option>
-
-                <option value="4">TRANSFER</option>
-
-            </select>
-
-            <label>Amount</label>
-            <input type="number" id="amount" required>
-
-            <label>Old Balance Sender</label>
-            <input type="number" id="oldbalanceOrg" required>
-
-            <label>New Balance Sender</label>
-            <input type="number" id="newbalanceOrig" required>
-
-            <label>Old Balance Receiver</label>
-            <input type="number" id="oldbalanceDest" required>
-
-            <label>New Balance Receiver</label>
-            <input type="number" id="newbalanceDest" required>
-
-            <label>Flagged Fraud</label>
-
-            <select id="isFlaggedFraud">
-
-                <option value="0">No</option>
-
-                <option value="1">Yes</option>
-
-            </select>
-
-            <br><br>
-
-            <button type="button" onclick="getExplanation()">
-                Get AI Explanation
+            <button type="button" id="tabBtnSingle" class="tab-btn active" onclick="showTab('single')">
+                Single Transaction
             </button>
 
-        </form>
+            <button type="button" id="tabBtnCsv" class="tab-btn" onclick="showTab('csv')">
+                Upload CSV
+            </button>
 
-        <hr>
+        </div>
 
-        <!-- Result Card -->
+        <br>
 
-        <div id="resultCard" class="result-card" style="display:none;">
+        <!-- ==================== SINGLE TRANSACTION TAB ==================== -->
 
-            <h2>AI Explanation Result</h2>
+        <div id="singleTab">
 
-            <p>
-                <strong>Status :</strong>
-                <span id="prediction"></span>
-            </p>
+            <form id="explanationForm">
 
-            <p>
-                <strong>Risk Score :</strong>
-                <span id="riskScore"></span>
-            </p>
+                <label>Step</label>
+                <input type="number" id="step" required>
 
-            <div class="progress">
+                <label>Transaction Type</label>
 
-                <div id="progressBar" class="progress-bar">0%</div>
+                <select id="type">
+
+                    <option value="0">CASH_IN</option>
+
+                    <option value="1">CASH_OUT</option>
+
+                    <option value="2">DEBIT</option>
+
+                    <option value="3">PAYMENT</option>
+
+                    <option value="4">TRANSFER</option>
+
+                </select>
+
+                <label>Amount</label>
+                <input type="number" id="amount" required>
+
+                <label>Old Balance Sender</label>
+                <input type="number" id="oldbalanceOrg" required>
+
+                <label>New Balance Sender</label>
+                <input type="number" id="newbalanceOrig" required>
+
+                <label>Old Balance Receiver</label>
+                <input type="number" id="oldbalanceDest" required>
+
+                <label>New Balance Receiver</label>
+                <input type="number" id="newbalanceDest" required>
+
+                <label>Flagged Fraud</label>
+
+                <select id="isFlaggedFraud">
+
+                    <option value="0">No</option>
+
+                    <option value="1">Yes</option>
+
+                </select>
+
+                <br><br>
+
+                <button type="button" onclick="getExplanation()">
+                    Get AI Explanation
+                </button>
+
+            </form>
+
+            <hr>
+
+            <!-- Result Card -->
+
+            <div id="resultCard" class="result-card" style="display:none;">
+
+                <h2>AI Explanation Result</h2>
+
+                <p>
+                    <strong>Status :</strong>
+                    <span id="prediction"></span>
+                </p>
+
+                <p>
+                    <strong>Risk Score :</strong>
+                    <span id="riskScore"></span>
+                </p>
+
+                <div class="progress">
+
+                    <div id="progressBar" class="progress-bar">0%</div>
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <!-- Reason Card -->
+
+            <div id="reasonCard" class="reason-card" style="display:none;">
+
+                <h2>Reasons</h2>
+
+                <ul id="reasonList">
+                </ul>
+
+            </div>
+
+            <br>
+
+            <!-- Recommendation Card -->
+
+            <div id="recommendationCard" class="recommendation-card" style="display:none;">
+
+                <h2>Recommendation</h2>
+
+                <p id="recommendation"></p>
 
             </div>
 
         </div>
 
-        <br>
+        <!-- ==================== CSV BATCH TAB ==================== -->
 
-        <!-- Reason Card -->
+        <div id="csvTab" style="display:none;">
 
-        <div id="reasonCard" class="reason-card" style="display:none;">
+            <div class="card">
 
-            <h2>Reasons</h2>
+                <p>
+                    Upload a transaction CSV. Every row will be scored by the fraud model,
+                    and an AI explanation will be generated automatically for each row
+                    predicted as <strong>Fraud</strong>.
+                </p>
 
-            <ul id="reasonList">
-            </ul>
+                <br>
 
-        </div>
+                <input type="file" id="csvFile" accept=".csv">
 
-        <br>
+                <button type="button" onclick="explainCsv()">Explain CSV</button>
 
-        <!-- Recommendation Card -->
+            </div>
 
-        <div id="recommendationCard" class="recommendation-card" style="display:none;">
+            <br>
 
-            <h2>Recommendation</h2>
+            <!-- Loading -->
 
-            <p id="recommendation"></p>
+            <div id="csvLoading" style="display:none;">
+
+                <h3>Analyzing transactions and generating explanations...</h3>
+
+            </div>
+
+            <!-- CSV Summary -->
+
+            <div id="csvSummaryCard" class="result-card" style="display:none;">
+
+                <h2>CSV Summary</h2>
+
+                <p>
+                    <strong>Total Records :</strong>
+                    <span id="csvTotalRecords"></span>
+                </p>
+
+                <p>
+                    <strong>Fraud Transactions Explained :</strong>
+                    <span id="csvFraudCount"></span>
+                </p>
+
+            </div>
+
+            <br>
+
+            <!-- CSV Explanations Table -->
+
+            <div id="csvResultsCard" class="card" style="display:none;">
+
+                <h2>Fraud Transaction Explanations</h2>
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Row</th>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Risk Score</th>
+                            <th>Reasons</th>
+                            <th>Recommendation</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="csvResultsBody">
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 

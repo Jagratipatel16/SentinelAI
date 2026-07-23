@@ -9,7 +9,8 @@ from app.services.graph_service import (
     get_mule_accounts,
     get_fraud_rings,
     get_circular_transfers,
-    get_network_graph
+    get_network_graph,
+    explain_network
 )
 
 router = APIRouter(
@@ -75,3 +76,13 @@ def circular_transfers(db: Session = Depends(get_db)):
 def network_graph(db: Session = Depends(get_db)):
 
     return get_network_graph(db)
+
+
+# --------------------------------------------------
+# AI Explanation of the Network
+# --------------------------------------------------
+
+@router.get("/explain")
+def graph_explanation(db: Session = Depends(get_db)):
+
+    return explain_network(db)

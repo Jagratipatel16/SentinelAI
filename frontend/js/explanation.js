@@ -178,6 +178,159 @@ async function getExplanation() {
 
 
 // ----------------------------
+// Tabs
+// ----------------------------
+
+function showTab(tab) {
+
+    const singleTab = document.getElementById("singleTab");
+    const csvTab = document.getElementById("csvTab");
+
+    const tabBtnSingle = document.getElementById("tabBtnSingle");
+    const tabBtnCsv = document.getElementById("tabBtnCsv");
+
+    if (tab === "csv") {
+
+        singleTab.style.display = "none";
+        csvTab.style.display = "block";
+
+        tabBtnCsv.classList.add("active");
+        tabBtnSingle.classList.remove("active");
+
+    }
+
+    else {
+
+        singleTab.style.display = "block";
+        csvTab.style.display = "none";
+
+        tabBtnSingle.classList.add("active");
+        tabBtnCsv.classList.remove("active");
+
+    }
+
+}
+
+
+// ----------------------------
+// Explain CSV (Batch)
+// ----------------------------
+
+async function explainCsv() {
+
+    const fileInput = document.getElementById("csvFile");
+
+    if (!fileInput.files.length) {
+
+        alert("Please choose a CSV file first.");
+        return;
+
+    }
+
+    const file = fileInput.files[0];
+
+    if (!file.name.endsWith(".csv")) {
+
+        alert("Only .csv files are allowed.");
+        return;
+
+    }
+
+    document.getElementById("csvLoading").style.display = "block";
+    document.getElementById("csvSummaryCard").style.display = "none";
+    document.getElementById("csvResultsCard").style.display = "none";
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+
+        const response = await fetch(
+
+            API_URL + "/explanation/batch-csv",
+
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            }
+
+        );
+
+        if (!response.ok) {
+
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || "CSV explanation failed.");
+
+        }
+
+        const result = await response.json();
+
+        document.getElementById("csvLoading").style.display = "none";
+
+        // ---------------- Summary ----------------
+
+        document.getElementById("csvSummaryCard").style.display = "block";
+
+        document.getElementById("csvTotalRecords").innerHTML =
+            result.total_records;
+
+        document.getElementById("csvFraudCount").innerHTML =
+            result.fraud_count;
+
+        // ---------------- Results Table ----------------
+
+        const body = document.getElementById("csvResultsBody");
+
+        body.innerHTML = "";
+
+        if (result.explanations.length === 0) {
+
+            body.innerHTML =
+                "<tr><td colspan='8'>No fraud transactions were found in this file.</td></tr>";
+
+        }
+
+        result.explanations.forEach(item => {
+
+            const row = document.createElement("tr");
+
+            const reasonsHtml = item.reasons
+                .map(r => "&#10003; " + r)
+                .join("<br>");
+
+            row.innerHTML =
+                "<td>" + item.row + "</td>" +
+                "<td>" + item.sender + "</td>" +
+                "<td>" + item.receiver + "</td>" +
+                "<td>" + item.type + "</td>" +
+                "<td>" + item.amount + "</td>" +
+                "<td>" + item.risk_score + "%</td>" +
+                "<td>" + reasonsHtml + "</td>" +
+                "<td>" + item.recommendation + "</td>";
+
+            body.appendChild(row);
+
+        });
+
+        document.getElementById("csvResultsCard").style.display = "block";
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+        document.getElementById("csvLoading").style.display = "none";
+        alert(error.message || "Unable to explain CSV.");
+
+    }
+
+}
+
+
+// ----------------------------
 // Logout
 // ----------------------------
 
