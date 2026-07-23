@@ -121,39 +121,35 @@ async function loadGraphData() {
 
         // ---------------- Fraud Rings ----------------
 
-        const ringsList = document.getElementById("fraudRingsList");
-        ringsList.innerHTML = "";
+        const ringsContainer = document.getElementById("fraudRingsContainer");
+        ringsContainer.innerHTML = "";
 
         if (fraudRings.length === 0) {
 
-            ringsList.innerHTML = "<li>No fraud rings detected.</li>";
+            ringsContainer.innerHTML = "<p>No fraud rings detected.</p>";
 
         }
 
-        fraudRings.forEach(ring => {
+        fraudRings.forEach((ring, i) => {
 
-            const li = document.createElement("li");
-            li.textContent = ring.join(" -> ") + " -> " + ring[0];
-            ringsList.appendChild(li);
+            renderRingDiagram(ringsContainer, ring, "Fraud Ring " + (i + 1), true);
 
         });
 
         // ---------------- Circular Transfers ----------------
 
-        const circularList = document.getElementById("circularTransfersList");
-        circularList.innerHTML = "";
+        const circularContainer = document.getElementById("circularTransfersContainer");
+        circularContainer.innerHTML = "";
 
         if (circularTransfers.length === 0) {
 
-            circularList.innerHTML = "<li>No circular transfers detected.</li>";
+            circularContainer.innerHTML = "<p>No circular transfers detected.</p>";
 
         }
 
-        circularTransfers.forEach(cycle => {
+        circularTransfers.forEach((cycle, i) => {
 
-            const li = document.createElement("li");
-            li.textContent = cycle.join(" -> ") + " -> " + cycle[0];
-            circularList.appendChild(li);
+            renderRingDiagram(circularContainer, cycle, "Cycle " + (i + 1), false);
 
         });
 
@@ -175,7 +171,7 @@ async function loadGraphData() {
 }
 
 // ----------------------------------------
-// Render Network Diagram (simple static SVG, circular layout)
+// Render Full Network Diagram (simple static SVG, circular layout)
 // ----------------------------------------
 
 function renderNetworkDiagram(data) {
@@ -183,8 +179,6 @@ function renderNetworkDiagram(data) {
     const svg = document.getElementById("networkSvg");
 
     const SVG_NS = "http://www.w3.org/2000/svg";
-
-    // Clear any previous diagram (in case of refresh)
 
     svg.innerHTML = "";
 
@@ -213,8 +207,6 @@ function renderNetworkDiagram(data) {
     const centerY = height / 2;
     const radius = Math.min(centerX, centerY) - 70;
 
-    // ---------------- Position each node evenly around a circle ----------------
-
     const positions = {};
 
     nodes.forEach((node, i) => {
@@ -231,8 +223,6 @@ function renderNetworkDiagram(data) {
 
     });
 
-    // ---------------- Arrowhead marker (defined once, reused by all edges) ----------------
-
     const defs = document.createElementNS(SVG_NS, "defs");
 
     defs.innerHTML =
@@ -241,8 +231,6 @@ function renderNetworkDiagram(data) {
         '</marker>';
 
     svg.appendChild(defs);
-
-    // ---------------- Draw Edges ----------------
 
     edges.forEach(edge => {
 
@@ -272,8 +260,6 @@ function renderNetworkDiagram(data) {
         svg.appendChild(line);
 
     });
-
-    // ---------------- Draw Nodes ----------------
 
     nodes.forEach(node => {
 
@@ -306,6 +292,127 @@ function renderNetworkDiagram(data) {
         svg.appendChild(label);
 
     });
+
+}
+
+
+// ----------------------------------------
+// Render a small node/edge diagram for a single ring/cycle
+// ----------------------------------------
+
+function renderRingDiagram(container, ring, caption, isFraud) {
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "inline-block";
+    wrapper.style.margin = "10px";
+    wrapper.style.textAlign = "center";
+    wrapper.style.verticalAlign = "top";
+
+    const title = document.createElement("p");
+    title.style.fontWeight = "bold";
+    title.style.marginBottom = "4px";
+    title.textContent = caption + ":  " + ring.join(" -> ") + " -> " + ring[0];
+
+    wrapper.appendChild(title);
+
+    const width = 260;
+    const height = 220;
+
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.style.border = "1px solid #eee";
+    svg.style.borderRadius = "8px";
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+
+    const positions = ring.map((account, i) => {
+
+        const angle = (2 * Math.PI * i) / ring.length - Math.PI / 2;
+
+        return {
+
+            id: account,
+
+            x: centerX + radius * Math.cos(angle),
+
+            y: centerY + radius * Math.sin(angle)
+
+        };
+
+    });
+
+    const markerId = "ringArrow-" + Math.random().toString(36).slice(2);
+
+    const defs = document.createElementNS(SVG_NS, "defs");
+
+    defs.innerHTML =
+        '<marker id="' + markerId + '" markerWidth="8" markerHeight="8" refX="8" refY="3" orient="auto">' +
+        '<polygon points="0 0, 8 3, 0 6" fill="' + (isFraud ? "#F44336" : "#888") + '"></polygon>' +
+        '</marker>';
+
+    svg.appendChild(defs);
+
+    for (let i = 0; i < positions.length; i++) {
+
+        const from = positions[i];
+        const to = positions[(i + 1) % positions.length];
+
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const shorten = 16;
+
+        const x2 = to.x - (dx / dist) * shorten;
+        const y2 = to.y - (dy / dist) * shorten;
+
+        const line = document.createElementNS(SVG_NS, "line");
+
+        line.setAttribute("x1", from.x);
+        line.setAttribute("y1", from.y);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", isFraud ? "#F44336" : "#888");
+        line.setAttribute("stroke-width", "2");
+        line.setAttribute("marker-end", "url(#" + markerId + ")");
+
+        svg.appendChild(line);
+
+    }
+
+    positions.forEach(pos => {
+
+        const circle = document.createElementNS(SVG_NS, "circle");
+
+        circle.setAttribute("cx", pos.x);
+        circle.setAttribute("cy", pos.y);
+        circle.setAttribute("r", 14);
+        circle.setAttribute("fill", isFraud ? "#F44336" : "#2196F3");
+        circle.setAttribute("stroke", "#fff");
+        circle.setAttribute("stroke-width", "2");
+
+        svg.appendChild(circle);
+
+        const label = document.createElementNS(SVG_NS, "text");
+
+        label.setAttribute("x", pos.x);
+        label.setAttribute("y", pos.y - 20);
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("font-size", "10");
+        label.setAttribute("fill", "#333");
+        label.textContent = pos.id;
+
+        svg.appendChild(label);
+
+    });
+
+    wrapper.appendChild(svg);
+    container.appendChild(wrapper);
 
 }
 
